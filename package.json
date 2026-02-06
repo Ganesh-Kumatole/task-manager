@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A simple task manager application using Node.js, Express, and MongoDB",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "nodemon  --env-file=.env app.js"
   },
