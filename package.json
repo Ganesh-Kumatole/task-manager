@@ -5,16 +5,16 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon  --env-file=.env app.js"
+    "start": "nodemon --env-file=.env ./app.js"
   },
   "keywords": [],
   "author": "Ganesh Kumatole",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
-    "mongoose": "^5.11.10"
+    "express": "^5.2.1",
+    "mongoose": "^9.1.6"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "nodemon": "^3.1.11"
   }
 }
