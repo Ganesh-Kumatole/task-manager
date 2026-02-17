@@ -15,7 +15,14 @@ const hostname = process.env.HOSTNAME;
 // parse JSON request body & serve static files
 app.use(express.json());
 app.use(express.static('public'));
+app.use(
+  '/vendor/fontawesome',
+  express.static(
+    path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free'),
+  ),
+);
 
+// serving root markup: GET /
 app.get('/', (req, res) => res.status(200).sendFile(rootMarkup));
 
 // requests handling
