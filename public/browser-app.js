@@ -40,8 +40,8 @@ const showTodos = async () => {
       })
       .join('');
     todosDOM.innerHTML = allTodos;
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     todosDOM.innerHTML =
       '<h5 class="empty-list">There was an error, please try later....</h5>';
   }
@@ -60,9 +60,10 @@ const createTodo = async (e) => {
     formAlertDOM.style.display = 'block';
     formAlertDOM.textContent = `success, task added`;
     formAlertDOM.classList.add('text-success');
-  } catch (error) {
+  } catch (err) {
     formAlertDOM.style.display = 'block';
     formAlertDOM.innerHTML = `error, please try again`;
+    console.error(err);
   }
   setTimeout(() => {
     formAlertDOM.style.display = 'none';
@@ -74,13 +75,16 @@ const createTodo = async (e) => {
 const deleteTodo = async (e) => {
   const el = e.target;
   if (el.parentElement.classList.contains('delete-btn')) {
+    if (!window.confirm('Are you sure?')) {
+      return;
+    }
     loadingDOM.style.visibility = 'visible';
     const id = el.parentElement.dataset.id;
     try {
       await axios.delete(`/api/v1/todos/${id}`);
       showTodos();
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.error(err);
     }
   }
   loadingDOM.style.visibility = 'hidden';

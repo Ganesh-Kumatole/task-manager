@@ -323,12 +323,12 @@ form > :last-child {
 }
 
 /*************
-     TASKS
+     TODOS
 *************/
 .empty-list {
   text-align: center;
 }
-.tasks-container {
+.todos-container {
   width: 100%;
   width: 90vw;
   max-width: var(--fixed-width);
@@ -336,7 +336,7 @@ form > :last-child {
   margin-top: 2rem;
   padding-bottom: 4rem;
 }
-.tasks {
+.todos {
   display: grid;
   gap: 1rem;
 }

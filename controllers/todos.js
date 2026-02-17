@@ -12,6 +12,11 @@ const getTodos = async (req, res) => {
     // Validate
     if (!todos.length) {
       console.log('No ToDos in the DB');
+      res.status(200).json({
+        data: {
+          todos,
+        },
+      });
       return;
     }
 
@@ -48,9 +53,28 @@ const editTodo = (req, res) => {
   res.send(`Testing PATCH /api/v1/todos/${id}`);
 };
 
-const deleteTodo = (req, res) => {
-  const { id } = req.params;
-  res.send(`Testing DELETE /api/v1/todos/${id}`);
+const deleteTodo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedTodo = await Todos.findByIdAndDelete(id);
+
+    // Validate
+    if (!deletedTodo) {
+      res.status(200).send('No such Todo exist in DB');
+      return;
+    }
+
+    res.status(200).json({
+      message: 'Deleted',
+      deletedTodo,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: err,
+    });
+  }
 };
 
 export { getTodo, getTodos, createTodo, editTodo, deleteTodo };
