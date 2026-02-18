@@ -6,13 +6,12 @@ const editBtnDOM = document.querySelector('.task-edit-btn');
 const formAlertDOM = document.querySelector('.form-alert');
 const params = window.location.search;
 const id = new URLSearchParams(params).get('id');
-let tempName;
 
 const showTask = async () => {
   try {
     const {
       data: { task },
-    } = await axios.get(`/api/v1/tasks/${id}`);
+    } = await axios.get(`/api/v1/todos/${id}`);
     const { _id: taskID, completed, name } = task;
 
     taskIDDOM.textContent = taskID;
@@ -21,14 +20,12 @@ const showTask = async () => {
     if (completed) {
       taskCompletedDOM.checked = true;
     }
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
   }
 };
 
-showTask();
-
-editFormDOM.addEventListener('submit', async (e) => {
+const editTodo = async (e) => {
   editBtnDOM.textContent = 'Loading...';
   e.preventDefault();
   try {
@@ -36,26 +33,23 @@ editFormDOM.addEventListener('submit', async (e) => {
     const taskCompleted = taskCompletedDOM.checked;
 
     const {
-      data: { task },
-    } = await axios.patch(`/api/v1/tasks/${id}`, {
+      data: { updatedTask },
+    } = await axios.patch(`/api/v1/todos/${id}`, {
       name: taskName,
       completed: taskCompleted,
     });
 
-    const { _id: taskID, completed, name } = task;
+    const { _id: taskID, name, completed } = updatedTask;
 
     taskIDDOM.textContent = taskID;
     taskNameDOM.value = name;
-    tempName = name;
-    if (completed) {
-      taskCompletedDOM.checked = true;
-    }
+    taskCompletedDOM.checked = completed;
+
     formAlertDOM.style.display = 'block';
     formAlertDOM.textContent = `success, edited task`;
     formAlertDOM.classList.add('text-success');
-  } catch (error) {
-    console.error(error);
-    taskNameDOM.value = tempName;
+  } catch (err) {
+    console.error(err);
     formAlertDOM.style.display = 'block';
     formAlertDOM.innerHTML = `error, please try again`;
   }
@@ -64,4 +58,11 @@ editFormDOM.addEventListener('submit', async (e) => {
     formAlertDOM.style.display = 'none';
     formAlertDOM.classList.remove('text-success');
   }, 3000);
-});
+};
+
+function editTaskWrapper() {
+  showTask(id);
+  editFormDOM.addEventListener('submit', editTodo);
+}
+
+editTaskWrapper();

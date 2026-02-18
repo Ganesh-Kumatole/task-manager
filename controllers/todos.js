@@ -1,8 +1,18 @@
 import Todos from '../models/Todos.js';
 
-const getTodo = (req, res) => {
-  const { id } = req.params;
-  res.send(`Testing GET /api/v1/todos/${id}`);
+const getTodo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const todoInfo = await Todos.findById(id);
+    res.status(200).json({
+      task: todoInfo,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: err,
+    });
+  }
 };
 
 const getTodos = async (req, res) => {
@@ -48,9 +58,21 @@ const createTodo = async (req, res) => {
   }
 };
 
-const editTodo = (req, res) => {
-  const { id } = req.params;
-  res.send(`Testing PATCH /api/v1/todos/${id}`);
+const editTodo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const todo = await Todos.findByIdAndUpdate(id, req.body, { new: true });
+    res.status(200).json({
+      message: 'Update successful',
+      updatedTask: todo,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: err,
+    });
+  }
 };
 
 const deleteTodo = async (req, res) => {
