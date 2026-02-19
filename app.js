@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import path from 'path';
 import todosRouter from './routes/todos.js';
 import connectDB from './database/connectDB.js';
@@ -21,6 +22,7 @@ app.use(
     path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free'),
   ),
 );
+app.use(cors());
 
 // serving root markup: GET /
 app.get('/', (req, res) => res.status(200).sendFile(rootMarkup));
