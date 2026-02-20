@@ -6,33 +6,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicon -->
     <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon" />
+    <!-- font awesome -->
+    <link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css" />
     <!-- normalize -->
     <link rel="stylesheet" href="./normalize.css" />
-    <!-- main  -->
+    <!-- main css -->
     <link rel="stylesheet" href="./main.css" />
     <title>Edit Task</title>
   </head>
   <body>
+    <!-- Header Section -->
+    <header class="app-header">
+      <h1><i class="fas fa-edit"></i> Edit Task</h1>
+      <p>Update your task details below</p>
+    </header>
+
+    <!-- Edit Task Form -->
     <div class="container">
       <form class="single-task-form">
-        <h4>Edit Task</h4>
+        <h4>Task Details</h4>
+
         <div class="form-control">
           <label>Task ID</label>
           <p class="task-edit-id"></p>
         </div>
+
         <div class="form-control">
           <label for="name">Name</label>
-          <input type="text" name="name" class="task-edit-name" />
+          <input
+            type="text"
+            name="name"
+            class="task-edit-name"
+            placeholder="Task name"
+          />
         </div>
+
         <div class="form-control">
-          <label for="completed">completed</label>
-          <input type="checkbox" name="completed" class="task-edit-completed" />
+          <label for="completed">Status</label>
+          <div class="checkbox-wrapper">
+            <input
+              type="checkbox"
+              name="completed"
+              class="task-edit-completed"
+              id="completed"
+            />
+            <span class="checkbox-label">Mark as completed</span>
+          </div>
         </div>
-        <button type="submit" class="block btn task-edit-btn">edit</button>
+
+        <button type="submit" class="btn block task-edit-btn">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+
         <div class="form-alert"></div>
       </form>
-      <a href="/" class="btn back-link">back to tasks</a>
+
+      <a href="/" class="btn back-link">
+        <i class="fas fa-arrow-left"></i> Back to Tasks
+      </a>
     </div>
+
     <!-- js -->
     <script src="./edit-task.js"></script>
   </body>

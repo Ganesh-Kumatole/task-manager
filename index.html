@@ -15,23 +15,35 @@
     <title>Task Manager</title>
   </head>
   <body>
+    <!-- Header Section -->
+    <header class="app-header">
+      <h1><i class="fas fa-task"></i> Task Manager</h1>
+      <p>Organize your life, one task at a time</p>
+    </header>
+
+    <!-- Task Form -->
     <form class="task-form">
-      <h4>task manager</h4>
+      <h4>Add New Task</h4>
       <div class="form-control">
         <input
           type="text"
           name="name"
           class="task-input"
-          placeholder="e.g. wash dishes"
+          placeholder="e.g., Wash dishes"
         />
-        <button type="submit" class="btn submit-btn">submit</button>
+        <button type="submit" class="btn submit-btn">
+          <i class="fas fa-plus"></i> Submit
+        </button>
       </div>
       <div class="form-alert"></div>
     </form>
+
+    <!-- Todos Container -->
     <section class="todos-container">
       <p class="loading-text">Loading...</p>
       <div class="todos"></div>
     </section>
+
     <script src="./browser-app.js" type="module"></script>
   </body>
 </html>

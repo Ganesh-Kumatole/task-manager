@@ -26,7 +26,7 @@ const showTask = async () => {
 };
 
 const editTodo = async (e) => {
-  editBtnDOM.textContent = 'Loading...';
+  editBtnDOM.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
   e.preventDefault();
   try {
     const taskName = taskNameDOM.value;
@@ -54,7 +54,7 @@ const editTodo = async (e) => {
     formAlertDOM.style.display = 'block';
     formAlertDOM.innerHTML = `error, please try again`;
   }
-  editBtnDOM.textContent = 'Edit';
+  editBtnDOM.innerHTML = '<i class="fas fa-save"></i> Save Changes';
   setTimeout(() => {
     formAlertDOM.style.display = 'none';
     formAlertDOM.classList.remove('text-success');

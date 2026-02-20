@@ -18,17 +18,29 @@ const showTodos = async () => {
     const todos = json?.data?.todos || [];
 
     if (todos.length < 1) {
-      todosDOM.innerHTML = '<h5 class="empty-list">No todos in your list</h5>';
+      todosDOM.innerHTML = `
+        <div class="empty-list">
+          <div class="empty-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h5>No tasks yet</h5>
+          <p>Add your first task above to get started!</p>
+        </div>`;
       loadingDOM.style.visibility = 'hidden';
       return;
     }
     const allTodos = todos
-      .map((task) => {
+      .map((task, index) => {
         const { completed, _id: taskID, name } = task;
         return `
-      <div class="single-task ${completed && 'task-completed'}">
-          <h5><span><i class="far fa-check-circle"></i></span>${name}</h5>
-          
+      <div class="single-task ${completed && 'task-completed'}" style="animation-delay: ${index * 0.05}s">
+          <div class="task-content">
+            <div class="task-checkbox ${completed && 'checked'}"></div>
+            <h5>${name}</h5>
+          </div>
+          <span class="status-badge ${completed ? 'completed' : 'pending'}">
+            ${completed ? '<i class="fas fa-check"></i> Done' : '<i class="fas fa-clock"></i> Pending'}
+          </span>
         <div class="task-links">
           <!-- edit link -->
           <a href="task.html?id=${taskID}"  class="edit-link">
@@ -45,8 +57,14 @@ const showTodos = async () => {
     todosDOM.innerHTML = allTodos;
   } catch (err) {
     console.error(err);
-    todosDOM.innerHTML =
-      '<h5 class="empty-list">There was an error, please try later....</h5>';
+    todosDOM.innerHTML = `
+      <div class="empty-list">
+        <div class="empty-icon" style="color: var(--red-dark);">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h5>Something went wrong</h5>
+        <p>Please try again later...</p>
+      </div>`;
   }
   loadingDOM.style.visibility = 'hidden';
 };
