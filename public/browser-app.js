@@ -8,11 +8,14 @@ const formAlertDOM = document.querySelector('.form-alert');
 const showTodos = async () => {
   loadingDOM.style.visibility = 'visible';
   try {
-    const {
-      data: {
-        data: { todos },
-      },
-    } = await axios.get('/api/v1/todos');
+    const response = await fetch('/api/v1/todos');
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${json.message || 'Unknown error'}`);
+    }
+
+    const json = await response.json();
+    const todos = json?.data?.todos || [];
 
     if (todos.length < 1) {
       todosDOM.innerHTML = '<h5 class="empty-list">No todos in your list</h5>';
@@ -54,7 +57,11 @@ const createTodo = async (e) => {
   const name = taskInputDOM.value;
 
   try {
-    await axios.post('/api/v1/todos', { name });
+    await fetch('/api/v1/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
     showTodos();
     taskInputDOM.value = '';
     formAlertDOM.style.display = 'block';
@@ -81,7 +88,7 @@ const deleteTodo = async (e) => {
     loadingDOM.style.visibility = 'visible';
     const id = el.parentElement.dataset.id;
     try {
-      await axios.delete(`/api/v1/todos/${id}`);
+      await fetch(`/api/v1/todos/${id}`, { method: 'DELETE' });
       showTodos();
     } catch (err) {
       console.error(err);

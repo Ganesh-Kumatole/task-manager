@@ -10,10 +10,17 @@ const rootMarkup = path.resolve(__dirname, 'index.html');
 const app = express();
 
 // access environment variables
-const port = process.env.PORT;
-const hostname = process.env.HOSTNAME;
+const port = process.env.PORT || 3000;
+const hostname = process.env.HOSTNAME || 'localhost';
 
-// parse JSON request body & serve static files
+// define essentials middlewares
+app.use(
+  cors({
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
+  }),
+);
 app.use(express.json());
 app.use(express.static('public'));
 app.use(
@@ -22,7 +29,6 @@ app.use(
     path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free'),
   ),
 );
-app.use(cors());
 
 // serving root markup: GET /
 app.get('/', (req, res) => res.status(200).sendFile(rootMarkup));

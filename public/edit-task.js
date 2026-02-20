@@ -9,9 +9,9 @@ const id = new URLSearchParams(params).get('id');
 
 const showTask = async () => {
   try {
-    const {
-      data: { task },
-    } = await axios.get(`/api/v1/todos/${id}`);
+    const response = await fetch(`/api/v1/todos/${id}`);
+    const json = await response.json();
+    const { task } = json;
     const { _id: taskID, completed, name } = task;
 
     taskIDDOM.textContent = taskID;
@@ -32,12 +32,13 @@ const editTodo = async (e) => {
     const taskName = taskNameDOM.value;
     const taskCompleted = taskCompletedDOM.checked;
 
-    const {
-      data: { updatedTask },
-    } = await axios.patch(`/api/v1/todos/${id}`, {
-      name: taskName,
-      completed: taskCompleted,
+    const response = await fetch(`/api/v1/todos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: taskName, completed: taskCompleted }),
     });
+    const json = await response.json();
+    const { updatedTask } = json;
 
     const { _id: taskID, name, completed } = updatedTask;
 
