@@ -1,9 +1,9 @@
-import Tasks from '../models/Task.js';
+import Tasks from '../models/Tasks.js';
 
 const getTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const taskInfo = await Task.findById(id);
+    const taskInfo = await Tasks.findById(id);
     res.status(200).json({
       task: taskInfo,
     });
@@ -17,7 +17,7 @@ const getTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
+    const tasks = await Tasks.find();
 
     // Validate
     if (!tasks.length) {
@@ -45,7 +45,7 @@ const getTasks = async (req, res) => {
 
 const createTask = async (req, res) => {
   try {
-    const newTask = await Task.create(req.body);
+    const newTask = await Tasks.create(req.body);
     res.status(201).json({
       message: 'Created',
       data: newTask,
@@ -61,7 +61,7 @@ const createTask = async (req, res) => {
 const editTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const task = await Task.findByIdAndUpdate(id, req.body, { new: true });
+    const task = await Tasks.findByIdAndUpdate(id, req.body, { new: true });
     res.status(200).json({
       message: 'Update successful',
       updatedTask: task,
@@ -78,7 +78,7 @@ const editTask = async (req, res) => {
 const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedTask = await Task.findByIdAndDelete(id);
+    const deletedTask = await Tasks.findByIdAndDelete(id);
 
     // Validate
     if (!deletedTask) {
