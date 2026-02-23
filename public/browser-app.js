@@ -1,24 +1,292 @@
-const todosDOM = document.querySelector('.todos');
+// DOM Elements
+const tasksDOM = document.querySelector('.tasks');
 const loadingDOM = document.querySelector('.loading-text');
 const formDOM = document.querySelector('.task-form');
 const taskInputDOM = document.querySelector('.task-input');
 const formAlertDOM = document.querySelector('.form-alert');
 
-// Load todos: GET /api/todos
-const showTodos = async () => {
-  loadingDOM.style.visibility = 'visible';
-  try {
-    const response = await fetch('/api/v1/todos');
+// Filter & Sort DOM Elements
+const searchInputDOM = document.getElementById('search-input');
+const statusFilterDOM = document.getElementById('status-filter');
+const categoryFilterDOM = document.getElementById('category-filter');
+const sortFieldDOM = document.getElementById('sort-field');
+const sortOrderDOM = document.getElementById('sort-order');
+const itemsPerPageDOM = document.getElementById('items-per-page');
+const paginationTextDOM = document.getElementById('pagination-text');
+const pageNumbersDOM = document.getElementById('page-numbers');
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${json.message || 'Unknown error'}`);
+// Pagination Buttons
+const firstPageBtn = document.getElementById('first-page');
+const prevPageBtn = document.getElementById('prev-page');
+const nextPageBtn = document.getElementById('next-page');
+const lastPageBtn = document.getElementById('last-page');
+
+// State Management
+let allTasks = [];
+let filteredTasks = [];
+let currentPage = 1;
+let itemsPerPage = 10;
+
+// State object
+const state = {
+  search: '',
+  status: 'all',
+  category: 'all',
+  sortField: 'createdAt',
+  sortOrder: 'desc',
+};
+
+// Debounce function for search
+function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+// Format date nicely
+function formatDate(dateString) {
+  if (!dateString) return 'No date';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+// Format priority with color
+function getPriorityBadge(priority) {
+  const colors = {
+    high: { bg: '#fecaca', color: '#dc2626' },
+    medium: { bg: '#fef08a', color: '#ca8a04' },
+    low: { bg: '#bbf7d0', color: '#16a34a' },
+  };
+  const c = colors[priority] || colors.medium;
+  return `<span class="priority-badge" style="background: ${c.bg}; color: ${c.color};">${priority || 'medium'}</span>`;
+}
+
+// Format status for display
+function getStatusDisplay(status, completed) {
+  if (completed || status === 'complete') {
+    return {
+      class: 'completed',
+      text: '<i class="fas fa-check"></i> Done',
+      value: 'complete',
+    };
+  }
+  if (status === 'in-progress') {
+    return {
+      class: 'in-progress',
+      text: '<i class="fas fa-spinner"></i> In Progress',
+      value: 'in-progress',
+    };
+  }
+  return {
+    class: 'pending',
+    text: '<i class="fas fa-clock"></i> Pending',
+    value: 'incomplete',
+  };
+}
+
+// Get category badge
+function getCategoryBadge(category) {
+  if (!category || category === 'all') return '';
+  return `<span class="category-badge">${category}</span>`;
+}
+
+// Apply filters to tasks
+function applyFilters(tasks) {
+  let result = [...tasks];
+
+  // Search filter (case-insensitive)
+  if (state.search) {
+    const searchLower = state.search.toLowerCase();
+    result = result.filter(
+      (task) =>
+        (task.name && task.name.toLowerCase().includes(searchLower)) ||
+        (task.description &&
+          task.description.toLowerCase().includes(searchLower)),
+    );
+  }
+
+  // Status filter
+  if (state.status !== 'all') {
+    result = result.filter((task) => {
+      if (state.status === 'complete')
+        return task.completed === true || task.status === 'complete';
+      if (state.status === 'incomplete')
+        return !task.completed && task.status !== 'complete';
+      if (state.status === 'in-progress') return task.status === 'in-progress';
+      return true;
+    });
+  }
+
+  // Category filter
+  if (state.category !== 'all') {
+    result = result.filter((task) => task.category === state.category);
+  }
+
+  return result;
+}
+
+// Apply sorting to tasks
+function applySorting(tasks) {
+  const result = [...tasks];
+
+  result.sort((a, b) => {
+    let valA, valB;
+
+    switch (state.sortField) {
+      case 'name':
+        valA = (a.name || '').toLowerCase();
+        valB = (b.name || '').toLowerCase();
+        break;
+      case 'status':
+        valA = a.completed ? 1 : 0;
+        valB = b.completed ? 1 : 0;
+        break;
+      case 'category':
+        valA = (a.category || '').toLowerCase();
+        valB = (b.category || '').toLowerCase();
+        break;
+      case 'createdAt':
+      default:
+        valA = new Date(a.createdAt || 0).getTime();
+        valB = new Date(b.createdAt || 0).getTime();
     }
 
-    const json = await response.json();
-    const todos = json?.data?.todos || [];
+    if (state.sortOrder === 'asc') {
+      return valA > valB ? 1 : valA < valB ? -1 : 0;
+    } else {
+      return valA < valB ? 1 : valA > valB ? -1 : 0;
+    }
+  });
 
-    if (todos.length < 1) {
-      todosDOM.innerHTML = `
+  return result;
+}
+
+// Get paginated tasks
+function getPaginatedTasks(tasks) {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return tasks.slice(startIndex, endIndex);
+}
+
+// Calculate total pages
+function getTotalPages(tasks) {
+  return Math.ceil(tasks.length / itemsPerPage);
+}
+
+// Update pagination UI
+function updatePaginationUI(tasks) {
+  const totalPages = getTotalPages(tasks);
+  const totalTasks = tasks.length;
+  const startIndex = totalTasks > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const endIndex = Math.min(currentPage * itemsPerPage, totalTasks);
+
+  // Update info text
+  if (totalTasks === 0) {
+    paginationTextDOM.textContent = 'No tasks found';
+  } else {
+    paginationTextDOM.textContent = `Showing ${startIndex}-${endIndex} of ${totalTasks} tasks`;
+  }
+
+  // Update page numbers
+  pageNumbersDOM.innerHTML = '';
+
+  if (totalPages <= 7) {
+    // Show all pages
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.addEventListener('click', () => goToPage(i));
+      pageNumbersDOM.appendChild(pageBtn);
+    }
+  } else {
+    // Show limited pages with ellipsis
+    const showPages = [1];
+
+    if (currentPage > 3) showPages.push('...');
+
+    for (
+      let i = Math.max(2, currentPage - 1);
+      i <= Math.min(currentPage + 1, totalPages - 1);
+      i++
+    ) {
+      showPages.push(i);
+    }
+
+    if (currentPage < totalPages - 2) showPages.push('...');
+
+    showPages.push(totalPages);
+
+    showPages.forEach((page) => {
+      if (page === '...') {
+        const ellipsis = document.createElement('span');
+        ellipsis.className = 'page-ellipsis';
+        ellipsis.textContent = '...';
+        pageNumbersDOM.appendChild(ellipsis);
+      } else {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-btn ${page === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = page;
+        pageBtn.addEventListener('click', () => goToPage(page));
+        pageNumbersDOM.appendChild(pageBtn);
+      }
+    });
+  }
+
+  // Update button states
+  firstPageBtn.disabled = currentPage === 1;
+  prevPageBtn.disabled = currentPage === 1;
+  nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+  lastPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+}
+
+// Go to specific page
+function goToPage(page) {
+  const totalPages = getTotalPages(filteredTasks);
+  if (page >= 1 && page <= totalPages) {
+    currentPage = page;
+    renderTasks();
+  }
+}
+
+// Reset to first page
+function resetToFirstPage() {
+  currentPage = 1;
+}
+
+// Process and render tasks
+function renderTasks() {
+  // Apply filters
+  filteredTasks = applyFilters(allTasks);
+
+  // Apply sorting
+  filteredTasks = applySorting(filteredTasks);
+
+  // Get paginated tasks
+  const paginatedTasks = getPaginatedTasks(filteredTasks);
+
+  // Update pagination
+  updatePaginationUI(filteredTasks);
+
+  // Render tasks
+  if (paginatedTasks.length < 1) {
+    if (filteredTasks.length === 0 && allTasks.length > 0) {
+      tasksDOM.innerHTML = `
+        <div class="empty-list">
+          <div class="empty-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h5>No tasks found</h5>
+          <p>Try adjusting your filters or search term</p>
+        </div>`;
+    } else {
+      tasksDOM.innerHTML = `
         <div class="empty-list">
           <div class="empty-icon">
             <i class="fas fa-clipboard-list"></i>
@@ -26,38 +294,83 @@ const showTodos = async () => {
           <h5>No tasks yet</h5>
           <p>Add your first task above to get started!</p>
         </div>`;
-      loadingDOM.style.visibility = 'hidden';
-      return;
     }
-    const allTodos = todos
-      .map((task, index) => {
-        const { completed, _id: taskID, name } = task;
-        return `
-      <div class="single-task ${completed && 'task-completed'}" style="animation-delay: ${index * 0.05}s">
+    return;
+  }
+
+  const allTodos = paginatedTasks
+    .map((task, index) => {
+      const {
+        completed,
+        _id: taskID,
+        name,
+        description,
+        status,
+        category,
+        priority,
+        dueDate,
+        createdAt,
+      } = task;
+      const statusDisplay = getStatusDisplay(status, completed);
+
+      return `
+      <div class="single-task ${completed ? 'task-completed' : ''}" style="animation-delay: ${index * 0.05}s">
+        <div class="task-main">
           <div class="task-content">
-            <div class="task-checkbox ${completed && 'checked'}"></div>
-            <h5>${name}</h5>
+            <div class="task-checkbox ${completed ? 'checked' : ''}"></div>
+            <div class="task-info">
+              <h5>${name}</h5>
+              ${description ? `<p class="task-description">${description}</p>` : ''}
+              <div class="task-meta">
+                ${getCategoryBadge(category)}
+                <span class="status-badge ${statusDisplay.class}">${statusDisplay.text}</span>
+                ${getPriorityBadge(priority)}
+                ${dueDate ? `<span class="due-date"><i class="fas fa-calendar-alt"></i> ${formatDate(dueDate)}</span>` : ''}
+              </div>
+            </div>
           </div>
-          <span class="status-badge ${completed ? 'completed' : 'pending'}">
-            ${completed ? '<i class="fas fa-check"></i> Done' : '<i class="fas fa-clock"></i> Pending'}
-          </span>
+        </div>
         <div class="task-links">
-          <!-- edit link -->
-          <a href="task.html?id=${taskID}"  class="edit-link">
+          <a href="task.html?id=${taskID}" class="edit-link" title="Edit Task">
             <i class="fas fa-edit"></i>
           </a>
-          <!-- delete btn -->
-          <button type="button" class="delete-btn" data-id="${taskID}">
+          <button type="button" class="delete-btn" data-id="${taskID}" title="Delete Task">
             <i class="fas fa-trash"></i>
           </button>
         </div>
       </div>`;
-      })
-      .join('');
-    todosDOM.innerHTML = allTodos;
+    })
+    .join('');
+
+  tasksDOM.innerHTML = allTodos;
+}
+
+// Load tasks: GET /api/tasks
+const showTasks = async () => {
+  loadingDOM.style.visibility = 'visible';
+  try {
+    const response = await fetch('/api/v1/tasks');
+
+    if (!response.ok) {
+      const json = await response.json();
+      throw new Error(`API Error: ${json.message || 'Unknown error'}`);
+    }
+
+    const json = await response.json();
+    allTasks = json?.data?.tasks || [];
+
+    // Initialize or preserve state
+    if (
+      filteredTasks.length === 0 ||
+      currentPage > getTotalPages(filteredTasks)
+    ) {
+      currentPage = 1;
+    }
+
+    renderTasks();
   } catch (err) {
     console.error(err);
-    todosDOM.innerHTML = `
+    tasksDOM.innerHTML = `
       <div class="empty-list">
         <div class="empty-icon" style="color: var(--red-dark);">
           <i class="fas fa-exclamation-triangle"></i>
@@ -69,25 +382,36 @@ const showTodos = async () => {
   loadingDOM.style.visibility = 'hidden';
 };
 
-// create todo: POST /api/v1/todos
-const createTodo = async (e) => {
+// create task: POST /api/v1/tasks
+const createTask = async (e) => {
   e.preventDefault();
   const name = taskInputDOM.value;
 
+  if (!name.trim()) {
+    formAlertDOM.style.display = 'block';
+    formAlertDOM.textContent = 'Please enter a task name';
+    formAlertDOM.classList.add('text-danger');
+    setTimeout(() => {
+      formAlertDOM.style.display = 'none';
+      formAlertDOM.classList.remove('text-danger');
+    }, 3000);
+    return;
+  }
+
   try {
-    await fetch('/api/v1/todos', {
+    await fetch('/api/v1/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
     });
-    showTodos();
+    showTasks();
     taskInputDOM.value = '';
     formAlertDOM.style.display = 'block';
-    formAlertDOM.textContent = `success, task added`;
+    formAlertDOM.textContent = 'success, task added';
     formAlertDOM.classList.add('text-success');
   } catch (err) {
     formAlertDOM.style.display = 'block';
-    formAlertDOM.innerHTML = `error, please try again`;
+    formAlertDOM.innerHTML = 'error, please try again';
     console.error(err);
   }
   setTimeout(() => {
@@ -96,8 +420,8 @@ const createTodo = async (e) => {
   }, 3000);
 };
 
-// delete todo: DELETE /api/todos/:id
-const deleteTodo = async (e) => {
+// delete task: DELETE /api/v1/tasks/:id
+const deleteTask = async (e) => {
   const el = e.target;
   if (el.parentElement.classList.contains('delete-btn')) {
     if (!window.confirm('Are you sure?')) {
@@ -106,8 +430,8 @@ const deleteTodo = async (e) => {
     loadingDOM.style.visibility = 'visible';
     const id = el.parentElement.dataset.id;
     try {
-      await fetch(`/api/v1/todos/${id}`, { method: 'DELETE' });
-      showTodos();
+      await fetch(`/api/v1/tasks/${id}`, { method: 'DELETE' });
+      showTasks();
     } catch (err) {
       console.error(err);
     }
@@ -115,10 +439,59 @@ const deleteTodo = async (e) => {
   loadingDOM.style.visibility = 'hidden';
 };
 
+// Filter change handlers
+const handleFilterChange = () => {
+  state.search = searchInputDOM.value;
+  state.status = statusFilterDOM.value;
+  state.category = categoryFilterDOM.value;
+  state.sortField = sortFieldDOM.value;
+  state.sortOrder = sortOrderDOM.value;
+  resetToFirstPage();
+  renderTasks();
+};
+
+// Debounced search handler
+const debouncedSearch = debounce(() => {
+  handleFilterChange();
+}, 300);
+
+// Event Listeners
+function initEventListeners() {
+  // Form submission
+  formDOM.addEventListener('submit', createTask);
+
+  // Delete task
+  tasksDOM.addEventListener('click', deleteTask);
+
+  // Search input
+  searchInputDOM.addEventListener('input', debouncedSearch);
+
+  // Filter dropdowns
+  statusFilterDOM.addEventListener('change', handleFilterChange);
+  categoryFilterDOM.addEventListener('change', handleFilterChange);
+  sortFieldDOM.addEventListener('change', handleFilterChange);
+  sortOrderDOM.addEventListener('change', handleFilterChange);
+
+  // Items per page
+  itemsPerPageDOM.addEventListener('change', (e) => {
+    itemsPerPage = parseInt(e.target.value);
+    resetToFirstPage();
+    renderTasks();
+  });
+
+  // Pagination buttons
+  firstPageBtn.addEventListener('click', () => goToPage(1));
+  prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+  nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
+  lastPageBtn.addEventListener('click', () =>
+    goToPage(getTotalPages(filteredTasks)),
+  );
+}
+
+// Initialize app
 function initApp() {
-  showTodos();
-  formDOM.addEventListener('submit', createTodo);
-  todosDOM.addEventListener('click', deleteTodo);
+  initEventListeners();
+  showTasks();
 }
 
 initApp();

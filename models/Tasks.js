@@ -1,10 +1,10 @@
 import { Schema, model } from 'mongoose';
 
-const TodoSchema = new Schema({
+const TaskSchema = new Schema({
   name: {
     type: String,
     required: true,
-    maxLenght: [25, 'Length of ToDo <= 25'],
+    maxLenght: [25, 'Length of Task <= 25'],
   },
   completed: {
     type: Boolean,
@@ -12,4 +12,4 @@ const TodoSchema = new Schema({
   },
 });
 
-export default model('Todos', TodoSchema);
+export default model('Tasks', TaskSchema);

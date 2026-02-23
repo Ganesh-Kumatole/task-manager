@@ -1,11 +1,11 @@
-import Todos from '../models/Todos.js';
+import Tasks from '../models/Task.js';
 
-const getTodo = async (req, res) => {
+const getTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const todoInfo = await Todos.findById(id);
+    const taskInfo = await Task.findById(id);
     res.status(200).json({
-      task: todoInfo,
+      task: taskInfo,
     });
   } catch (err) {
     res.status(500).json({
@@ -15,16 +15,16 @@ const getTodo = async (req, res) => {
   }
 };
 
-const getTodos = async (req, res) => {
+const getTasks = async (req, res) => {
   try {
-    const todos = await Todos.find();
+    const tasks = await Task.find();
 
     // Validate
-    if (!todos.length) {
-      console.log('No ToDos in the DB');
+    if (!tasks.length) {
+      console.log('No Tasks in the DB');
       res.status(200).json({
         data: {
-          todos,
+          tasks,
         },
       });
       return;
@@ -32,7 +32,7 @@ const getTodos = async (req, res) => {
 
     res.status(200).json({
       data: {
-        todos,
+        tasks,
       },
     });
   } catch (err) {
@@ -43,12 +43,12 @@ const getTodos = async (req, res) => {
   }
 };
 
-const createTodo = async (req, res) => {
+const createTask = async (req, res) => {
   try {
-    const newTodo = await Todos.create(req.body);
+    const newTask = await Task.create(req.body);
     res.status(201).json({
       message: 'Created',
-      data: newTodo,
+      data: newTask,
     });
   } catch (err) {
     res.status(500).json({
@@ -58,13 +58,13 @@ const createTodo = async (req, res) => {
   }
 };
 
-const editTodo = async (req, res) => {
+const editTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const todo = await Todos.findByIdAndUpdate(id, req.body, { new: true });
+    const task = await Task.findByIdAndUpdate(id, req.body, { new: true });
     res.status(200).json({
       message: 'Update successful',
-      updatedTask: todo,
+      updatedTask: task,
     });
   } catch (err) {
     console.log(err);
@@ -75,20 +75,20 @@ const editTodo = async (req, res) => {
   }
 };
 
-const deleteTodo = async (req, res) => {
+const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedTodo = await Todos.findByIdAndDelete(id);
+    const deletedTask = await Task.findByIdAndDelete(id);
 
     // Validate
-    if (!deletedTodo) {
-      res.status(200).send('No such Todo exist in DB');
+    if (!deletedTask) {
+      res.status(200).send('No such Task exist in DB');
       return;
     }
 
     res.status(200).json({
       message: 'Deleted',
-      deletedTodo,
+      deletedTask,
     });
   } catch (err) {
     console.log(err);
@@ -99,4 +99,4 @@ const deleteTodo = async (req, res) => {
   }
 };
 
-export { getTodo, getTodos, createTodo, editTodo, deleteTodo };
+export { getTask, getTasks, createTask, editTask, deleteTask };

@@ -32,17 +32,62 @@
         </div>
 
         <div class="form-control">
-          <label for="name">Name</label>
+          <label for="name">Task Name</label>
           <input
             type="text"
             name="name"
             class="task-edit-name"
-            placeholder="Task name"
+            placeholder="Enter task name"
           />
         </div>
 
         <div class="form-control">
-          <label for="completed">Status</label>
+          <label for="description">Description</label>
+          <textarea
+            name="description"
+            class="task-edit-description"
+            placeholder="Enter task description"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-control">
+          <label for="status">Status</label>
+          <select name="status" class="task-edit-status">
+            <option value="incomplete">Incomplete</option>
+            <option value="in-progress">In Progress</option>
+            <option value="complete">Complete</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label for="category">Category</label>
+          <select name="category" class="task-edit-category">
+            <option value="">Select category</option>
+            <option value="finance">Finance</option>
+            <option value="chore">Chore</option>
+            <option value="family">Family</option>
+            <option value="office">Office</option>
+            <option value="personal">Personal</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label for="priority">Priority</label>
+          <select name="priority" class="task-edit-priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label for="dueDate">Due Date</label>
+          <input type="date" name="dueDate" class="task-edit-dueDate" />
+        </div>
+
+        <div class="form-control">
+          <label for="completed">Completion</label>
           <div class="checkbox-wrapper">
             <input
               type="checkbox"

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import todosRouter from './routes/todos.js';
+import tasksRouter from './routes/tasks.js';
 import connectDB from './database/connectDB.js';
 
 const __dirname = import.meta.dirname;
@@ -34,7 +34,7 @@ app.use(
 app.get('/', (req, res) => res.status(200).sendFile(rootMarkup));
 
 // requests handling
-app.use('/api/v1/todos', todosRouter);
+app.use('/api/v1/tasks', tasksRouter);
 
 // start server & connect DB
 async function initApp() {

@@ -38,10 +38,139 @@
       <div class="form-alert"></div>
     </form>
 
-    <!-- Todos Container -->
-    <section class="todos-container">
+    <!-- Filter & Sort Controls -->
+    <section class="filters-container">
+      <div class="filters-panel">
+        <!-- Search -->
+        <div class="filter-group search-group">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              id="search-input"
+              class="filter-search"
+              placeholder="Search tasks..."
+            />
+          </div>
+        </div>
+
+        <!-- Filter Dropdowns -->
+        <div class="filter-row">
+          <!-- Status Filter -->
+          <div class="filter-group">
+            <label for="status-filter">
+              <i class="fas fa-filter"></i> Status
+            </label>
+            <select id="status-filter" class="filter-select">
+              <option value="all">All</option>
+              <option value="incomplete">Incomplete</option>
+              <option value="in-progress">In Progress</option>
+              <option value="complete">Complete</option>
+            </select>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <label for="category-filter">
+              <i class="fas fa-tags"></i> Category
+            </label>
+            <select id="category-filter" class="filter-select">
+              <option value="all">All</option>
+              <option value="finance">Finance</option>
+              <option value="chore">Chore</option>
+              <option value="family">Family</option>
+              <option value="office">Office</option>
+              <option value="personal">Personal</option>
+            </select>
+          </div>
+
+          <!-- Sort Field -->
+          <div class="filter-group">
+            <label for="sort-field">
+              <i class="fas fa-sort"></i> Sort By
+            </label>
+            <select id="sort-field" class="filter-select">
+              <option value="createdAt">Created Date</option>
+              <option value="name">Task Name</option>
+              <option value="status">Status</option>
+              <option value="category">Category</option>
+            </select>
+          </div>
+
+          <!-- Sort Order -->
+          <div class="filter-group">
+            <label for="sort-order">
+              <i class="fas fa-sort-amount-up"></i> Order
+            </label>
+            <select id="sort-order" class="filter-select">
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tasks Container -->
+    <section class="tasks-container">
       <p class="loading-text">Loading...</p>
-      <div class="todos"></div>
+      <div class="tasks"></div>
+    </section>
+
+    <!-- Pagination Controls -->
+    <section class="pagination-container">
+      <div class="pagination-info">
+        <span id="pagination-text">Showing 0-0 of 0 tasks</span>
+      </div>
+      <div class="pagination-controls">
+        <!-- Items per page -->
+        <div class="items-per-page">
+          <label for="items-per-page">Show:</label>
+          <select id="items-per-page" class="filter-select small">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+        <!-- Page Buttons -->
+        <div class="pagination-buttons">
+          <button
+            id="first-page"
+            class="btn btn-small btn-outline"
+            title="First Page"
+          >
+            <i class="fas fa-angle-double-left"></i>
+          </button>
+          <button
+            id="prev-page"
+            class="btn btn-small btn-outline"
+            title="Previous Page"
+          >
+            <i class="fas fa-angle-left"></i>
+          </button>
+
+          <div id="page-numbers" class="page-numbers">
+            <!-- Page numbers will be rendered here -->
+          </div>
+
+          <button
+            id="next-page"
+            class="btn btn-small btn-outline"
+            title="Next Page"
+          >
+            <i class="fas fa-angle-right"></i>
+          </button>
+          <button
+            id="last-page"
+            class="btn btn-small btn-outline"
+            title="Last Page"
+          >
+            <i class="fas fa-angle-double-right"></i>
+          </button>
+        </div>
+      </div>
     </section>
 
     <script src="./browser-app.js" type="module"></script>
