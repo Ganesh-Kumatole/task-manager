@@ -3,12 +3,15 @@ const tasksDOM = document.querySelector('.tasks');
 const loadingDOM = document.querySelector('.loading-text');
 const formDOM = document.querySelector('.task-form');
 const taskInputDOM = document.querySelector('.task-input');
+const taskCategoryDOM = document.getElementById('task-category');
+const taskPriorityDOM = document.getElementById('task-priority');
 const formAlertDOM = document.querySelector('.form-alert');
 
-// Filter & Sort DOM Elements
+// Search, Filter & Sort DOM Elements
 const searchInputDOM = document.getElementById('search-input');
 const statusFilterDOM = document.getElementById('status-filter');
 const categoryFilterDOM = document.getElementById('category-filter');
+const priorityFilterDOM = document.getElementById('priority-filter');
 const sortFieldDOM = document.getElementById('sort-field');
 const sortOrderDOM = document.getElementById('sort-order');
 const itemsPerPageDOM = document.getElementById('items-per-page');
@@ -22,19 +25,43 @@ const nextPageBtn = document.getElementById('next-page');
 const lastPageBtn = document.getElementById('last-page');
 
 // State Management
-let allTasks = [];
-let filteredTasks = [];
 let currentPage = 1;
 let itemsPerPage = 10;
+let totalTasks = 0;
+let totalPages = 0;
 
-// State object
+// State object for query parameters
 const state = {
   search: '',
   status: 'all',
   category: 'all',
+  priority: 'all',
   sortField: 'createdAt',
   sortOrder: 'desc',
 };
+
+// Build query string from state
+function buildQueryString() {
+  const params = new URLSearchParams();
+
+  // Add search
+  if (state.search) params.append('search', state.search);
+
+  // Add filters
+  if (state.status !== 'all') params.append('status', state.status);
+  if (state.category !== 'all') params.append('category', state.category);
+  if (state.priority !== 'all') params.append('priority', state.priority);
+
+  // Add sorting
+  const sortPrefix = state.sortOrder === 'desc' ? '-' : '';
+  params.append('sort', `${sortPrefix}${state.sortField}`);
+
+  // Add pagination
+  params.append('page', currentPage);
+  params.append('limit', itemsPerPage);
+
+  return params.toString();
+}
 
 // Debounce function for search
 function debounce(func, delay) {
@@ -96,93 +123,14 @@ function getCategoryBadge(category) {
   return `<span class="category-badge">${category}</span>`;
 }
 
-// Apply filters to tasks
-function applyFilters(tasks) {
-  let result = [...tasks];
-
-  // Search filter (case-insensitive)
-  if (state.search) {
-    const searchLower = state.search.toLowerCase();
-    result = result.filter(
-      (task) =>
-        (task.name && task.name.toLowerCase().includes(searchLower)) ||
-        (task.description &&
-          task.description.toLowerCase().includes(searchLower)),
-    );
-  }
-
-  // Status filter
-  if (state.status !== 'all') {
-    result = result.filter((task) => {
-      if (state.status === 'complete')
-        return task.completed === true || task.status === 'complete';
-      if (state.status === 'incomplete')
-        return !task.completed && task.status !== 'complete';
-      if (state.status === 'in-progress') return task.status === 'in-progress';
-      return true;
-    });
-  }
-
-  // Category filter
-  if (state.category !== 'all') {
-    result = result.filter((task) => task.category === state.category);
-  }
-
-  return result;
-}
-
-// Apply sorting to tasks
-function applySorting(tasks) {
-  const result = [...tasks];
-
-  result.sort((a, b) => {
-    let valA, valB;
-
-    switch (state.sortField) {
-      case 'name':
-        valA = (a.name || '').toLowerCase();
-        valB = (b.name || '').toLowerCase();
-        break;
-      case 'status':
-        valA = a.completed ? 1 : 0;
-        valB = b.completed ? 1 : 0;
-        break;
-      case 'category':
-        valA = (a.category || '').toLowerCase();
-        valB = (b.category || '').toLowerCase();
-        break;
-      case 'createdAt':
-      default:
-        valA = new Date(a.createdAt || 0).getTime();
-        valB = new Date(b.createdAt || 0).getTime();
-    }
-
-    if (state.sortOrder === 'asc') {
-      return valA > valB ? 1 : valA < valB ? -1 : 0;
-    } else {
-      return valA < valB ? 1 : valA > valB ? -1 : 0;
-    }
-  });
-
-  return result;
-}
-
-// Get paginated tasks
-function getPaginatedTasks(tasks) {
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  return tasks.slice(startIndex, endIndex);
-}
-
 // Calculate total pages
-function getTotalPages(tasks) {
-  return Math.ceil(tasks.length / itemsPerPage);
+function calculateTotalPages() {
+  return Math.ceil(totalTasks / itemsPerPage);
 }
 
 // Update pagination UI
-function updatePaginationUI(tasks) {
-  const totalPages = getTotalPages(tasks);
-  const totalTasks = tasks.length;
+function updatePaginationUI() {
+  totalPages = calculateTotalPages();
   const startIndex = totalTasks > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
   const endIndex = Math.min(currentPage * itemsPerPage, totalTasks);
 
@@ -248,10 +196,9 @@ function updatePaginationUI(tasks) {
 
 // Go to specific page
 function goToPage(page) {
-  const totalPages = getTotalPages(filteredTasks);
   if (page >= 1 && page <= totalPages) {
     currentPage = page;
-    renderTasks();
+    showTasks();
   }
 }
 
@@ -260,23 +207,10 @@ function resetToFirstPage() {
   currentPage = 1;
 }
 
-// Process and render tasks
-function renderTasks() {
-  // Apply filters
-  filteredTasks = applyFilters(allTasks);
-
-  // Apply sorting
-  filteredTasks = applySorting(filteredTasks);
-
-  // Get paginated tasks
-  const paginatedTasks = getPaginatedTasks(filteredTasks);
-
-  // Update pagination
-  updatePaginationUI(filteredTasks);
-
-  // Render tasks
-  if (paginatedTasks.length < 1) {
-    if (filteredTasks.length === 0 && allTasks.length > 0) {
+// Render tasks to DOM
+function renderTasks(tasks) {
+  if (!tasks || tasks.length === 0) {
+    if (totalTasks === 0 && (state.search || state.status !== 'all' || state.category !== 'all' || state.priority !== 'all')) {
       tasksDOM.innerHTML = `
         <div class="empty-list">
           <div class="empty-icon">
@@ -298,7 +232,7 @@ function renderTasks() {
     return;
   }
 
-  const allTodos = paginatedTasks
+  const allTodos = tasks
     .map((task, index) => {
       const {
         completed,
@@ -345,11 +279,12 @@ function renderTasks() {
   tasksDOM.innerHTML = allTodos;
 }
 
-// Load tasks: GET /api/tasks
+// Load tasks from backend with query parameters
 const showTasks = async () => {
   loadingDOM.style.visibility = 'visible';
   try {
-    const response = await fetch('/api/v1/tasks');
+    const queryString = buildQueryString();
+    const response = await fetch(`/api/v1/tasks?${queryString}`);
 
     if (!response.ok) {
       const json = await response.json();
@@ -357,17 +292,18 @@ const showTasks = async () => {
     }
 
     const json = await response.json();
-    allTasks = json?.data?.tasks || [];
-
-    // Initialize or preserve state
-    if (
-      filteredTasks.length === 0 ||
-      currentPage > getTotalPages(filteredTasks)
-    ) {
-      currentPage = 1;
-    }
-
-    renderTasks();
+    const tasks = json?.data?.tasks || [];
+    
+    // Extract pagination metadata from response
+    // Backend should return: { data: { tasks: [...], totalTasks, currentPage, totalPages } }
+    totalTasks = json?.data?.totalTasks || tasks.length;
+    totalPages = json?.data?.totalPages || calculateTotalPages();
+    
+    // Update pagination UI
+    updatePaginationUI();
+    
+    // Render tasks
+    renderTasks(tasks);
   } catch (err) {
     console.error(err);
     tasksDOM.innerHTML = `
@@ -386,6 +322,8 @@ const showTasks = async () => {
 const createTask = async (e) => {
   e.preventDefault();
   const name = taskInputDOM.value;
+  const category = taskCategoryDOM.value;
+  const priority = taskPriorityDOM.value;
 
   if (!name.trim()) {
     formAlertDOM.style.display = 'block';
@@ -399,13 +337,19 @@ const createTask = async (e) => {
   }
 
   try {
+    const taskData = { name };
+    if (category) taskData.category = category;
+    if (priority) taskData.priority = priority;
+
     await fetch('/api/v1/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(taskData),
     });
     showTasks();
     taskInputDOM.value = '';
+    taskCategoryDOM.value = '';
+    taskPriorityDOM.value = 'medium';
     formAlertDOM.style.display = 'block';
     formAlertDOM.textContent = 'success, task added';
     formAlertDOM.classList.add('text-success');
@@ -444,10 +388,11 @@ const handleFilterChange = () => {
   state.search = searchInputDOM.value;
   state.status = statusFilterDOM.value;
   state.category = categoryFilterDOM.value;
+  state.priority = priorityFilterDOM.value;
   state.sortField = sortFieldDOM.value;
   state.sortOrder = sortOrderDOM.value;
   resetToFirstPage();
-  renderTasks();
+  showTasks();
 };
 
 // Debounced search handler
@@ -469,6 +414,7 @@ function initEventListeners() {
   // Filter dropdowns
   statusFilterDOM.addEventListener('change', handleFilterChange);
   categoryFilterDOM.addEventListener('change', handleFilterChange);
+  priorityFilterDOM.addEventListener('change', handleFilterChange);
   sortFieldDOM.addEventListener('change', handleFilterChange);
   sortOrderDOM.addEventListener('change', handleFilterChange);
 
@@ -476,16 +422,14 @@ function initEventListeners() {
   itemsPerPageDOM.addEventListener('change', (e) => {
     itemsPerPage = parseInt(e.target.value);
     resetToFirstPage();
-    renderTasks();
+    showTasks();
   });
 
   // Pagination buttons
   firstPageBtn.addEventListener('click', () => goToPage(1));
   prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
   nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
-  lastPageBtn.addEventListener('click', () =>
-    goToPage(getTotalPages(filteredTasks)),
-  );
+  lastPageBtn.addEventListener('click', () => goToPage(totalPages));
 }
 
 // Initialize app

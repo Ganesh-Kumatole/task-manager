@@ -40,6 +40,7 @@ const TaskSchema = new Schema(
           'chore',
           'family',
           'sports',
+          'others',
         ],
         message: '{PATH} cannot have {VALUE} as a value... :(',
       },

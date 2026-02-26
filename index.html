@@ -30,11 +30,42 @@
           name="name"
           class="task-input"
           placeholder="e.g., Wash dishes"
+          required
         />
         <button type="submit" class="btn submit-btn">
           <i class="fas fa-plus"></i> Submit
         </button>
       </div>
+
+      <!-- Additional Task Fields -->
+      <div class="form-row-grid">
+        <div class="form-field">
+          <label for="task-category">Category</label>
+          <select name="category" id="task-category" class="task-select">
+            <option value="" selected disabled hidden>Select category</option>
+            <option value="work">Work</option>
+            <option value="study">Study</option>
+            <option value="health">Health</option>
+            <option value="sports">Sports</option>
+            <option value="finance">Finance</option>
+            <option value="chore">Chore</option>
+            <option value="family">Family</option>
+            <option value="personal">Personal</option>
+            <option value="others">Others</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="task-priority">Priority</label>
+          <select name="priority" id="task-priority" class="task-select">
+            <option value="" disabled selected hidden>Select Priority</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+
       <div class="form-alert"></div>
     </form>
 
@@ -63,9 +94,9 @@
             </label>
             <select id="status-filter" class="filter-select">
               <option value="all">All</option>
-              <option value="incomplete">Incomplete</option>
-              <option value="in-progress">In Progress</option>
-              <option value="complete">Complete</option>
+              <option value="pending">Pending</option>
+              <option value="doing">Doing</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
 
@@ -76,11 +107,28 @@
             </label>
             <select id="category-filter" class="filter-select">
               <option value="all">All</option>
+              <option value="work">Work</option>
+              <option value="study">Study</option>
+              <option value="health">Health</option>
+              <option value="sports">Sports</option>
               <option value="finance">Finance</option>
               <option value="chore">Chore</option>
               <option value="family">Family</option>
-              <option value="office">Office</option>
               <option value="personal">Personal</option>
+              <option value="others">Others</option>
+            </select>
+          </div>
+
+          <!-- Priority Filter -->
+          <div class="filter-group">
+            <label for="priority-filter">
+              <i class="fas fa-exclamation-circle"></i> Priority
+            </label>
+            <select id="priority-filter" class="filter-select">
+              <option value="all">All</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
             </select>
           </div>
 
@@ -94,6 +142,7 @@
               <option value="name">Task Name</option>
               <option value="status">Status</option>
               <option value="category">Category</option>
+              <option value="priority">Priority</option>
             </select>
           </div>
 
