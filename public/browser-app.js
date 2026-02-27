@@ -210,7 +210,13 @@ function resetToFirstPage() {
 // Render tasks to DOM
 function renderTasks(tasks) {
   if (!tasks || tasks.length === 0) {
-    if (totalTasks === 0 && (state.search || state.status !== 'all' || state.category !== 'all' || state.priority !== 'all')) {
+    if (
+      totalTasks === 0 &&
+      (state.search ||
+        state.status !== 'all' ||
+        state.category !== 'all' ||
+        state.priority !== 'all')
+    ) {
       tasksDOM.innerHTML = `
         <div class="empty-list">
           <div class="empty-icon">
@@ -285,6 +291,7 @@ const showTasks = async () => {
   try {
     const queryString = buildQueryString();
     const response = await fetch(`/api/v1/tasks?${queryString}`);
+    console.log(`API Endpoint: /api/v1/tasks?${queryString}`);
 
     if (!response.ok) {
       const json = await response.json();
@@ -293,15 +300,15 @@ const showTasks = async () => {
 
     const json = await response.json();
     const tasks = json?.data?.tasks || [];
-    
+
     // Extract pagination metadata from response
     // Backend should return: { data: { tasks: [...], totalTasks, currentPage, totalPages } }
     totalTasks = json?.data?.totalTasks || tasks.length;
     totalPages = json?.data?.totalPages || calculateTotalPages();
-    
+
     // Update pagination UI
     updatePaginationUI();
-    
+
     // Render tasks
     renderTasks(tasks);
   } catch (err) {

@@ -1,4 +1,5 @@
 import Tasks from '../models/Tasks.js';
+import buildFilterObj from '../utils/helpers.js';
 
 const getTask = async (req, res) => {
   try {
@@ -17,7 +18,8 @@ const getTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
-    const tasks = await Tasks.find();
+    const filter = buildFilterObj(req.query);
+    const tasks = await Tasks.find(filter);
 
     // Validate
     if (!tasks.length) {

@@ -909,7 +909,7 @@ input:focus-visible {
 
 .search-input-wrapper i {
   position: absolute;
-  left: 1rem;
+  right: 1rem;
   color: var(--grey-500);
   font-size: 0.9rem;
 }
@@ -1294,7 +1294,7 @@ input:focus-visible {
     font-size: 0.65rem;
     padding: 0.1rem 0.4rem;
   }
-  
+
   .form-row-grid {
     grid-template-columns: 1fr;
   }
