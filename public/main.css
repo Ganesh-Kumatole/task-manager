@@ -645,8 +645,8 @@ input[type='text']::placeholder {
 /* Loading */
 .loading-text {
   text-align: center;
-  color: var(--grey-500);
-  padding: 2rem;
+  color: var(--grey-700);
+  padding: 0.5rem 2rem;
 }
 
 @keyframes spinner {

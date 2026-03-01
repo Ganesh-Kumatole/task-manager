@@ -44,10 +44,8 @@ const state = {
 function buildQueryString() {
   const params = new URLSearchParams();
 
-  // Add search
-  if (state.search) params.append('search', state.search);
-
   // Add filters
+  if (state.search) params.append('search', state.search);
   if (state.status !== 'all') params.append('status', state.status);
   if (state.category !== 'all') params.append('category', state.category);
   if (state.priority !== 'all') params.append('priority', state.priority);
@@ -291,7 +289,6 @@ const showTasks = async () => {
   try {
     const queryString = buildQueryString();
     const response = await fetch(`/api/v1/tasks?${queryString}`);
-    console.log(`API Endpoint: /api/v1/tasks?${queryString}`);
 
     if (!response.ok) {
       const json = await response.json();

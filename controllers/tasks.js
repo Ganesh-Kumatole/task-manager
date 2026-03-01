@@ -19,7 +19,8 @@ const getTask = async (req, res) => {
 const getTasks = async (req, res) => {
   try {
     const filter = buildFilterObj(req.query);
-    const tasks = await Tasks.find(filter);
+    const sortBy = req.query.sort;
+    const tasks = await Tasks.find(filter).sort(sortBy);
 
     // Validate
     if (!tasks.length) {
