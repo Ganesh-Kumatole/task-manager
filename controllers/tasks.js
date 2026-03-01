@@ -20,7 +20,15 @@ const getTasks = async (req, res) => {
   try {
     const filter = buildFilterObj(req.query);
     const sortBy = req.query.sort;
-    const tasks = await Tasks.find(filter).sort(sortBy);
+    const { page: currentPage, limit: limitValue } = req.query;
+
+    const totalTasks = await Tasks.find(filter).sort(sortBy).countDocuments();
+    const tasks = await Tasks.find(filter)
+      .sort(sortBy)
+      .skip(limitValue * (+currentPage - 1))
+      .limit(limitValue);
+
+    const totalPages = Math.ceil(totalTasks / limitValue);
 
     // Validate
     if (!tasks.length) {
@@ -28,6 +36,9 @@ const getTasks = async (req, res) => {
       res.status(200).json({
         data: {
           tasks,
+          totalTasks,
+          currentPage: Number(currentPage),
+          totalPages,
         },
       });
       return;
@@ -36,6 +47,9 @@ const getTasks = async (req, res) => {
     res.status(200).json({
       data: {
         tasks,
+        totalTasks,
+        currentPage: Number(currentPage),
+        totalPages,
       },
     });
   } catch (err) {

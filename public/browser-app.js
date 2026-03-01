@@ -26,7 +26,7 @@ const lastPageBtn = document.getElementById('last-page');
 
 // State Management
 let currentPage = 1;
-let itemsPerPage = 10;
+let itemsPerPage = 5;
 let totalTasks = 0;
 let totalPages = 0;
 
@@ -133,11 +133,9 @@ function updatePaginationUI() {
   const endIndex = Math.min(currentPage * itemsPerPage, totalTasks);
 
   // Update info text
-  if (totalTasks === 0) {
-    paginationTextDOM.textContent = 'No tasks found';
-  } else {
-    paginationTextDOM.textContent = `Showing ${startIndex}-${endIndex} of ${totalTasks} tasks`;
-  }
+  paginationTextDOM.textContent = totalTasks
+    ? `Showing ${startIndex}-${endIndex} of ${totalTasks} tasks`
+    : 'No tasks found';
 
   // Update page numbers
   pageNumbersDOM.innerHTML = '';
@@ -289,6 +287,7 @@ const showTasks = async () => {
   try {
     const queryString = buildQueryString();
     const response = await fetch(`/api/v1/tasks?${queryString}`);
+    console.log(`API endpoint: /api/v1/tasks?${queryString}`);
 
     if (!response.ok) {
       const json = await response.json();
