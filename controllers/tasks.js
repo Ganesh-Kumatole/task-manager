@@ -78,9 +78,13 @@ const createTask = async (req, res) => {
 const editTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const task = await Tasks.findByIdAndUpdate(id, req.body, { new: true });
+    const task = await Tasks.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
     res.status(200).json({
-      message: 'Update successful',
+      message: 'Task updated successfully',
       updatedTask: task,
     });
   } catch (err) {

@@ -7,6 +7,10 @@ const TaskSchema = new Schema(
       required: true,
       maxLenght: [25, 'Length of Task <= 25'],
     },
+    description: {
+      type: String,
+      trim: true,
+    },
     status: {
       type: String,
       enum: {
@@ -47,6 +51,20 @@ const TaskSchema = new Schema(
       required: true,
       lowercase: true,
       trim: true,
+    },
+    dueDate: {
+      type: Date,
+      validate: {
+        validator: (enteredDate) => {
+          if (!enteredDate) return true;
+
+          const currentDate = new Date();
+          currentDate.setHours(0, 0, 0, 0);
+
+          return enteredDate >= currentDate;
+        },
+        message: 'Please enter a valid due-date!',
+      },
     },
   },
   {

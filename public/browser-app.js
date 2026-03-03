@@ -88,30 +88,30 @@ function getPriorityBadge(priority) {
     medium: { bg: '#fef08a', color: '#ca8a04' },
     low: { bg: '#bbf7d0', color: '#16a34a' },
   };
-  const c = colors[priority] || colors.medium;
-  return `<span class="priority-badge" style="background: ${c.bg}; color: ${c.color};">${priority || 'medium'}</span>`;
+  const c = colors[priority];
+  return `<span class="priority-badge" style="background: ${c.bg}; color: ${c.color};">${priority}</span>`;
 }
 
 // Format status for display
-function getStatusDisplay(status, completed) {
-  if (completed || status === 'complete') {
+function getStatusDisplay(status) {
+  if (status === 'completed') {
     return {
       class: 'completed',
       text: '<i class="fas fa-check"></i> Done',
-      value: 'complete',
+      value: 'completed',
     };
   }
-  if (status === 'in-progress') {
+  if (status === 'doing') {
     return {
       class: 'in-progress',
-      text: '<i class="fas fa-spinner"></i> In Progress',
-      value: 'in-progress',
+      text: '<i class="fas fa-spinner"></i> Doing',
+      value: 'doing',
     };
   }
   return {
     class: 'pending',
     text: '<i class="fas fa-clock"></i> Pending',
-    value: 'incomplete',
+    value: 'pending',
   };
 }
 
@@ -237,7 +237,6 @@ function renderTasks(tasks) {
   const allTodos = tasks
     .map((task, index) => {
       const {
-        completed,
         _id: taskID,
         name,
         description,
@@ -245,15 +244,15 @@ function renderTasks(tasks) {
         category,
         priority,
         dueDate,
-        createdAt,
       } = task;
-      const statusDisplay = getStatusDisplay(status, completed);
+
+      const statusDisplay = getStatusDisplay(status);
 
       return `
-      <div class="single-task ${completed ? 'task-completed' : ''}" style="animation-delay: ${index * 0.05}s">
+      <div class="single-task ${status === 'completed' ? 'task-completed' : ''}" style="animation-delay: ${index * 0.05}s">
         <div class="task-main">
           <div class="task-content">
-            <div class="task-checkbox ${completed ? 'checked' : ''}"></div>
+            <div class="task-checkbox ${status === 'completed' ? 'checked' : ''}"></div>
             <div class="task-info">
               <h5>${name}</h5>
               ${description ? `<p class="task-description">${description}</p>` : ''}

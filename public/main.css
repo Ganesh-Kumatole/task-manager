@@ -504,20 +504,9 @@ input[type='text']::placeholder {
 }
 
 .task-checkbox.checked {
-  background: linear-gradient(
-    135deg,
-    var(--gradient-start),
-    var(--gradient-end)
-  );
+  background: var(--primary-500) no-repeat center;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
   border-color: var(--primary-500);
-}
-
-.task-checkbox.checked::after {
-  content: '\f00c';
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;
-  color: white;
-  font-size: 0.7rem;
 }
 
 .single-task h5 {
@@ -540,12 +529,9 @@ input[type='text']::placeholder {
 }
 
 .task-completed .task-checkbox {
-  background: var(--green-dark);
+  background: var(--green-dark) no-repeat center;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
   border-color: var(--green-dark);
-}
-
-.task-completed .task-checkbox::after {
-  content: '\f00c';
 }
 
 /* Status Badge */

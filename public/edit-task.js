@@ -1,12 +1,10 @@
 // DOM Elements
-const taskIDDOM = document.querySelector('.task-edit-id');
 const taskNameDOM = document.querySelector('.task-edit-name');
 const taskDescriptionDOM = document.querySelector('.task-edit-description');
 const taskStatusDOM = document.querySelector('.task-edit-status');
 const taskCategoryDOM = document.querySelector('.task-edit-category');
 const taskPriorityDOM = document.querySelector('.task-edit-priority');
 const taskDueDateDOM = document.querySelector('.task-edit-dueDate');
-const taskCompletedDOM = document.querySelector('.task-edit-completed');
 const editFormDOM = document.querySelector('.single-task-form');
 const editBtnDOM = document.querySelector('.task-edit-btn');
 const formAlertDOM = document.querySelector('.form-alert');
@@ -19,33 +17,24 @@ const id = new URLSearchParams(params).get('id');
 const showTask = async () => {
   try {
     const response = await fetch(`/api/v1/tasks/${id}`);
+
     if (!response.ok) {
       throw new Error('Failed to fetch task');
     }
-    const json = await response.json();
-    const { task } = json;
+
+    const parsedJSON = await response.json();
+    const { task } = parsedJSON;
 
     // Extract all fields from task
-    const {
-      _id: taskID,
-      completed,
-      name,
-      description,
-      status,
-      category,
-      priority,
-      dueDate,
-    } = task;
+    const { name, description, status, category, priority, dueDate } = task;
 
     // Populate form fields
-    taskIDDOM.textContent = taskID;
-    taskNameDOM.value = name || '';
+    taskNameDOM.value = name;
     taskDescriptionDOM.value = description || '';
-    taskStatusDOM.value = status || 'incomplete';
-    taskCategoryDOM.value = category || '';
-    taskPriorityDOM.value = priority || 'medium';
+    taskStatusDOM.value = status || 'pending';
+    taskCategoryDOM.value = category;
+    taskPriorityDOM.value = priority;
     taskDueDateDOM.value = dueDate ? dueDate.split('T')[0] : '';
-    taskCompletedDOM.checked = completed || false;
   } catch (err) {
     console.error(err);
     formAlertDOM.style.display = 'block';
@@ -63,12 +52,11 @@ const editTask = async (e) => {
     // Build update object with all fields
     const updateData = {
       name: taskNameDOM.value,
-      description: taskDescriptionDOM.value || undefined,
+      description: taskDescriptionDOM.value || '',
       status: taskStatusDOM.value,
-      category: taskCategoryDOM.value || undefined,
+      category: taskCategoryDOM.value,
       priority: taskPriorityDOM.value,
-      dueDate: taskDueDateDOM.value || undefined,
-      completed: taskCompletedDOM.checked,
+      dueDate: taskDueDateDOM.value,
     };
 
     const response = await fetch(`/api/v1/tasks/${id}`, {
@@ -81,29 +69,19 @@ const editTask = async (e) => {
       throw new Error('Failed to update task');
     }
 
-    const json = await response.json();
-    const { updatedTask } = json;
+    const parsedJSON = await response.json();
+    const { updatedTask } = parsedJSON;
 
     // Update UI with returned data
-    const {
-      _id: taskID,
-      name,
-      completed,
-      description,
-      status,
-      category,
-      priority,
-      dueDate,
-    } = updatedTask;
+    const { name, description, status, category, priority, dueDate } =
+      updatedTask;
 
-    taskIDDOM.textContent = taskID;
     taskNameDOM.value = name;
     taskDescriptionDOM.value = description || '';
     taskStatusDOM.value = status;
-    taskCategoryDOM.value = category || '';
-    taskPriorityDOM.value = priority || 'medium';
+    taskCategoryDOM.value = category;
+    taskPriorityDOM.value = priority;
     taskDueDateDOM.value = dueDate ? dueDate.split('T')[0] : '';
-    taskCompletedDOM.checked = completed;
 
     // Show success message
     formAlertDOM.style.display = 'block';
@@ -135,7 +113,7 @@ function editTaskWrapper() {
     return;
   }
 
-  showTask(id);
+  showTask();
   editFormDOM.addEventListener('submit', editTask);
 }
 

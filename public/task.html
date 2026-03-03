@@ -27,11 +27,6 @@
         <h4>Task Details</h4>
 
         <div class="form-control">
-          <label>Task ID</label>
-          <p class="task-edit-id"></p>
-        </div>
-
-        <div class="form-control">
           <label for="name">Task Name</label>
           <input
             type="text"
@@ -54,21 +49,24 @@
         <div class="form-control">
           <label for="status">Status</label>
           <select name="status" class="task-edit-status">
-            <option value="incomplete">Incomplete</option>
-            <option value="in-progress">In Progress</option>
-            <option value="complete">Complete</option>
+            <option value="pending">Pending</option>
+            <option value="doing">Doing</option>
+            <option value="completed">Completed</option>
           </select>
         </div>
 
         <div class="form-control">
           <label for="category">Category</label>
           <select name="category" class="task-edit-category">
-            <option value="">Select category</option>
+            <option value="work">Work</option>
+            <option value="study">Study</option>
+            <option value="health">Health</option>
+            <option value="sports">Sports</option>
             <option value="finance">Finance</option>
             <option value="chore">Chore</option>
             <option value="family">Family</option>
-            <option value="office">Office</option>
             <option value="personal">Personal</option>
+            <option value="others">Others</option>
           </select>
         </div>
 
@@ -84,19 +82,6 @@
         <div class="form-control">
           <label for="dueDate">Due Date</label>
           <input type="date" name="dueDate" class="task-edit-dueDate" />
-        </div>
-
-        <div class="form-control">
-          <label for="completed">Completion</label>
-          <div class="checkbox-wrapper">
-            <input
-              type="checkbox"
-              name="completed"
-              class="task-edit-completed"
-              id="completed"
-            />
-            <span class="checkbox-label">Mark as completed</span>
-          </div>
         </div>
 
         <button type="submit" class="btn block task-edit-btn">
