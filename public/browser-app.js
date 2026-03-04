@@ -286,7 +286,6 @@ const showTasks = async () => {
   try {
     const queryString = buildQueryString();
     const response = await fetch(`/api/v1/tasks?${queryString}`);
-    console.log(`API endpoint: /api/v1/tasks?${queryString}`);
 
     if (!response.ok) {
       const json = await response.json();
@@ -404,7 +403,7 @@ const handleTaskAction = async (e) => {
 
   // Check if delete button was clicked
   if (el.parentElement.classList.contains('delete-btn')) {
-    await deleteTask(el.parentElement);
+    await deleteTask(el);
     return;
   }
 
