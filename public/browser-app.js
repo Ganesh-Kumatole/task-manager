@@ -366,40 +366,52 @@ const createTask = async (e) => {
   }, 3000);
 };
 
+// delete task: DELETE /api/v1/tasks/:id
+const deleteTask = async (el) => {
+  if (!window.confirm('Are you sure?')) {
+    return;
+  }
+  loadingDOM.style.visibility = 'visible';
+  const id = el.parentElement.dataset.id;
+  try {
+    await fetch(`/api/v1/tasks/${id}`, { method: 'DELETE' });
+    showTasks();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// toggle task status: PATCH /api/v1/tasks/:id
+const toggleTask = async (el) => {
+  const taskElement = el.closest('.single-task');
+  const taskId = taskElement.querySelector('.delete-btn').dataset.id;
+  const isCompleted = el.classList.contains('checked');
+  try {
+    await fetch(`/api/v1/tasks/${taskId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: isCompleted ? 'pending' : 'completed' }),
+    });
+    showTasks();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 // Handle task actions (delete, toggle status)
 const handleTaskAction = async (e) => {
   const el = e.target;
 
   // Check if delete button was clicked
   if (el.parentElement.classList.contains('delete-btn')) {
-    if (!window.confirm('Are you sure?')) {
-      return;
-    }
-    loadingDOM.style.visibility = 'visible';
-    const id = el.parentElement.dataset.id;
-    try {
-      await fetch(`/api/v1/tasks/${id}`, { method: 'DELETE' });
-      showTasks();
-    } catch (err) {
-      console.error(err);
-    }
+    await deleteTask(el.parentElement);
+    return;
   }
 
   // Check if checkbox was clicked for status toggle
   if (el.classList.contains('task-checkbox')) {
-    const taskElement = el.closest('.single-task');
-    const taskId = taskElement.querySelector('.delete-btn').dataset.id;
-    const isCompleted = el.classList.contains('checked');
-    try {
-      await fetch(`/api/v1/tasks/${taskId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: isCompleted ? 'pending' : 'completed' }),
-      });
-      showTasks();
-    } catch (err) {
-      console.error(err);
-    }
+    await toggleTask(el);
+    return;
   }
 
   loadingDOM.style.visibility = 'hidden';
