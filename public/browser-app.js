@@ -366,9 +366,11 @@ const createTask = async (e) => {
   }, 3000);
 };
 
-// delete task: DELETE /api/v1/tasks/:id
-const deleteTask = async (e) => {
+// Handle task actions (delete, toggle status)
+const handleTaskAction = async (e) => {
   const el = e.target;
+
+  // Check if delete button was clicked
   if (el.parentElement.classList.contains('delete-btn')) {
     if (!window.confirm('Are you sure?')) {
       return;
@@ -382,6 +384,24 @@ const deleteTask = async (e) => {
       console.error(err);
     }
   }
+
+  // Check if checkbox was clicked for status toggle
+  if (el.classList.contains('task-checkbox')) {
+    const taskElement = el.closest('.single-task');
+    const taskId = taskElement.querySelector('.delete-btn').dataset.id;
+    const isCompleted = el.classList.contains('checked');
+    try {
+      await fetch(`/api/v1/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: isCompleted ? 'pending' : 'completed' }),
+      });
+      showTasks();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   loadingDOM.style.visibility = 'hidden';
 };
 
@@ -408,7 +428,7 @@ function initEventListeners() {
   formDOM.addEventListener('submit', createTask);
 
   // Delete task
-  tasksDOM.addEventListener('click', deleteTask);
+  tasksDOM.addEventListener('click', handleTaskAction);
 
   // Search input
   searchInputDOM.addEventListener('input', debouncedSearch);
