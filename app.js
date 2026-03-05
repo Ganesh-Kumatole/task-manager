@@ -1,27 +1,34 @@
+import { configDotenv } from 'dotenv';
+configDotenv(); // load .env first
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import { fileURLToPath } from 'url';
+
 import tasksRouter from './routes/tasks.js';
 import connectDB from './database/connectDB.js';
 import errorHandler from './middlewares/errors.js';
 
-const __dirname = import.meta.dirname;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// resolve root HTML
 const rootMarkup = path.resolve(__dirname, 'index.html');
 
+// define app instance
 const app = express();
 
 // access environment variables
 const port = process.env.PORT || 3000;
 const hostname = process.env.HOSTNAME || 'localhost';
 
-// define essentials middlewares
-app.use(
-  cors({
-    origin: '*',
-    credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
-  }),
-);
+// define middlewares
+app.use(helmet());
+app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.static('public'));
 app.use(
@@ -31,19 +38,20 @@ app.use(
   ),
 );
 
-// serving root markup: GET /
-app.get('/', (req, res) => res.status(200).sendFile(rootMarkup));
+// handle root route
+app.get('/', (req, res) => res.sendFile(rootMarkup));
 
-// requests handling
+// handle /tasks route
 app.use('/api/v1/tasks', tasksRouter);
 
-// global error handling middleware
+// global error-handling middleware
 app.use(errorHandler);
 
-// start server & connect DB
+// initialize app
 async function initApp() {
   try {
     await connectDB(process.env.DB_URL);
+
     app.listen(port, hostname, () => {
       console.log(
         `Server is listening for connections: http://${hostname}:${port}`,
@@ -51,6 +59,7 @@ async function initApp() {
     });
   } catch (error) {
     console.error('Error initializing app:', error);
+    process.exit(1);
   }
 }
 
