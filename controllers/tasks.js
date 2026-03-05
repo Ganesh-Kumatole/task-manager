@@ -1,7 +1,7 @@
 import Tasks from '../models/Tasks.js';
 import buildFilterObj from '../utils/helpers.js';
 
-const getTask = async (req, res) => {
+const getTask = async (req, res, next) => {
   try {
     const { id } = req.params;
     const taskInfo = await Tasks.findById(id);
@@ -9,14 +9,11 @@ const getTask = async (req, res) => {
       task: taskInfo,
     });
   } catch (err) {
-    res.status(500).json({
-      message: 'Internal Server Error',
-      error: err,
-    });
+    next(err);
   }
 };
 
-const getTasks = async (req, res) => {
+const getTasks = async (req, res, next) => {
   try {
     const filter = buildFilterObj(req.query);
     const sortBy = req.query.sort;
@@ -53,14 +50,11 @@ const getTasks = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
-      message: 'Internal Server Error',
-      error: err,
-    });
+    next(err);
   }
 };
 
-const createTask = async (req, res) => {
+const createTask = async (req, res, next) => {
   try {
     const newTask = await Tasks.create(req.body);
     res.status(201).json({
@@ -68,14 +62,11 @@ const createTask = async (req, res) => {
       data: newTask,
     });
   } catch (err) {
-    res.status(500).json({
-      message: 'Internal Server Error',
-      error: err,
-    });
+    next(err);
   }
 };
 
-const editTask = async (req, res) => {
+const editTask = async (req, res, next) => {
   try {
     const { id } = req.params;
     const task = await Tasks.findByIdAndUpdate(id, req.body, {
@@ -88,15 +79,11 @@ const editTask = async (req, res) => {
       updatedTask: task,
     });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: 'Internal Server Error',
-      error: err,
-    });
+    next(err);
   }
 };
 
-const deleteTask = async (req, res) => {
+const deleteTask = async (req, res, next) => {
   try {
     const { id } = req.params;
     const deletedTask = await Tasks.findByIdAndDelete(id);
@@ -112,11 +99,7 @@ const deleteTask = async (req, res) => {
       deletedTask,
     });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: 'Internal Server Error',
-      error: err,
-    });
+    next(err);
   }
 };
 

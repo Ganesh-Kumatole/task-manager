@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import tasksRouter from './routes/tasks.js';
 import connectDB from './database/connectDB.js';
+import errorHandler from './middlewares/errors.js';
 
 const __dirname = import.meta.dirname;
 const rootMarkup = path.resolve(__dirname, 'index.html');
@@ -35,6 +36,9 @@ app.get('/', (req, res) => res.status(200).sendFile(rootMarkup));
 
 // requests handling
 app.use('/api/v1/tasks', tasksRouter);
+
+// global error handling middleware
+app.use(errorHandler);
 
 // start server & connect DB
 async function initApp() {
